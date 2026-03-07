@@ -48,10 +48,8 @@ export const api = {
       }),
       responses: {
         200: z.object({
-          item: z.string(),
-          type: z.string(),
-          weight_kg: z.number(),
-          estimated_value_inr: z.number(),
+          category: z.string(),
+          problem: z.string(),
         }),
         400: errorSchemas.validation,
       },

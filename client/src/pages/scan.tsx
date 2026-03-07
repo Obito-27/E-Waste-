@@ -15,10 +15,10 @@ export default function ScanPage() {
   const [step, setStep] = useState<ScanStep>("upload");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    itemName: "",
     category: "",
-    weight: 0,
-    estimatedValue: 0
+    problem: "",
+    brand: "",
+    model: "",
   });
 
   const scanMutation = useScanEwaste();
@@ -37,20 +37,20 @@ export default function ScanPage() {
       try {
         const result = await scanMutation.mutateAsync(base64);
         setFormData({
-          itemName: result.item,
-          category: result.type,
-          weight: result.weight_kg,
-          estimatedValue: result.estimated_value_inr
+          category: result.category,
+          problem: result.problem,
+          brand: "",
+          model: "",
         });
         setStep("review");
       } catch (error) {
         // Fallback for mock if backend isn't ready
         setTimeout(() => {
           setFormData({
-            itemName: "MacBook Pro 2018",
             category: "Laptop",
-            weight: 1.8,
-            estimatedValue: 2500
+            problem: "Screen Damage",
+            brand: "",
+            model: "",
           });
           setStep("review");
         }, 2000);
@@ -71,7 +71,10 @@ export default function ScanPage() {
     
     try {
       await createMutation.mutateAsync({
-        ...formData,
+        itemName: `${formData.brand} ${formData.model}`,
+        category: formData.category,
+        weight: 1,
+        estimatedValue: 5000,
         ownerId: user.uid
       });
       setStep("success");
@@ -176,47 +179,57 @@ export default function ScanPage() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">Item Name</label>
-                      <input
-                        type="text"
-                        value={formData.itemName}
-                        onChange={(e) => setFormData({...formData, itemName: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-bold text-foreground mb-2">Category</label>
-                        <input
-                          type="text"
-                          value={formData.category}
-                          onChange={(e) => setFormData({...formData, category: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
-                          required
-                        />
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Device Category</p>
+                          <p className="text-lg font-bold text-foreground mt-1">{formData.category}</p>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Detected Issue</p>
+                          <p className="text-lg font-bold text-foreground mt-1">{formData.problem}</p>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-bold text-foreground mb-2">Weight (kg)</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={formData.weight || ""}
-                          onChange={(e) => setFormData({...formData, weight: e.target.value ? parseFloat(e.target.value) : 0})}
-                          className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
-                          required
-                        />
+                    </div>
+
+                    <div className="border-t border-border pt-4">
+                      <p className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                        <span className="text-primary">●</span> Please provide device details
+                      </p>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-bold text-foreground mb-2">Brand Name</label>
+                          <input
+                            type="text"
+                            value={formData.brand}
+                            onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                            placeholder="e.g., Apple, Samsung, Dell, etc."
+                            className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-bold text-foreground mb-2">Model</label>
+                          <input
+                            type="text"
+                            value={formData.model}
+                            onChange={(e) => setFormData({...formData, model: e.target.value})}
+                            placeholder="e.g., MacBook Pro 14-inch, Galaxy S24, etc."
+                            className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
 
                     <button
                       type="submit"
-                      disabled={createMutation.isPending}
+                      disabled={createMutation.isPending || !formData.brand || !formData.model}
                       className="w-full py-4 rounded-xl font-bold text-lg text-white emerald-gradient shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-4"
                     >
-                      {createMutation.isPending ? "Scheduling..." : "Confirm & Schedule"}
+                      {createMutation.isPending ? "Scheduling..." : "Confirm & Schedule Pickup"}
                     </button>
                   </form>
                 </div>
@@ -240,7 +253,7 @@ export default function ScanPage() {
                 </motion.div>
                 <h2 className="text-3xl font-bold font-display mb-3">Pickup Scheduled!</h2>
                 <p className="text-muted-foreground text-lg mb-8 max-w-md">
-                  Your <span className="font-semibold text-foreground">{formData.itemName}</span> has been added to the queue. A partner will be in touch soon.
+                  Your <span className="font-semibold text-foreground">{formData.brand} {formData.model}</span> has been added to the queue. A partner will be in touch soon.
                 </p>
                 <div className="flex gap-4">
                   <button

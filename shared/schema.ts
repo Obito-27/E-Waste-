@@ -19,9 +19,7 @@ export type InsertPickup = z.infer<typeof insertPickupSchema>;
 export type Pickup = typeof pickups.$inferSelect;
 
 export const scanResponseSchema = z.object({
-  item: z.string(),
-  type: z.string(),
-  weight_kg: z.number(),
-  estimated_value_inr: z.number(),
+  category: z.string(),
+  problem: z.string(),
 });
 export type ScanResponse = z.infer<typeof scanResponseSchema>;

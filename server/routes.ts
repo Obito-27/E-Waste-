@@ -49,12 +49,14 @@ export async function registerRoutes(
     try {
       const input = api.scan.process.input.parse(req.body);
       
-      const prompt = `Analyze this image of e-waste. Return ONLY a JSON object with this exact structure, no markdown formatting or backticks:
+      const prompt = `You are an e-waste recycling expert. Analyze this image of electronic equipment. Identify:
+1. The category/type of device (e.g., Laptop, Mobile Phone, Battery, Monitor, Headphones, etc.)
+2. The problem or condition of the device (e.g., Broken Screen, Not Turning On, Battery Dead, Water Damaged, Physical Damage, Functional, Minor Issues, etc.)
+
+Return ONLY a JSON object with this exact structure, no markdown formatting or backticks:
 {
-  "item": "string (name of the item)",
-  "type": "string (category e.g. Laptop, Battery, Mobile)",
-  "weight_kg": number (estimated weight in kg),
-  "estimated_value_inr": number (estimated value in INR)
+  "category": "string (device category)",
+  "problem": "string (specific problem or condition)"
 }`;
 
       // Extract base64 data and mime type if passed as data URL
