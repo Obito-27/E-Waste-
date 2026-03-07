@@ -203,8 +203,8 @@ export default function ScanPage() {
                         <input
                           type="number"
                           step="0.01"
-                          value={formData.weight}
-                          onChange={(e) => setFormData({...formData, weight: parseFloat(e.target.value)})}
+                          value={formData.weight || ""}
+                          onChange={(e) => setFormData({...formData, weight: e.target.value ? parseFloat(e.target.value) : 0})}
                           className="w-full px-4 py-3 rounded-xl bg-background border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
                           required
                         />
